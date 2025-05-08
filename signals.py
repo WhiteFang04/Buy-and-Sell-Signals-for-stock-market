@@ -236,61 +236,41 @@ if uploaded_file:
         ))
 
         # Chart pattern annotations + connecting lines
+                # Chart pattern annotations
         for idx, row in df.iterrows():
             if pd.notna(row['Chart_Pattern']):
                 fig.add_annotation(
                     x=idx,
-                    y=row['High'] * 1.02,
+                    y=df.loc[idx]['High'] * 1.01,
                     text=row['Chart_Pattern'],
                     showarrow=True,
-                    arrowhead=2,
-                    arrowsize=1,
-                    arrowwidth=2,
-                    arrowcolor='yellow',
-                    font=dict(size=10, color="yellow")
+                    arrowhead=1,
+                    ax=0,
+                    ay=-30,
+                    font=dict(color="blue"),
+                    arrowcolor="blue"
                 )
 
-        # Connect detected chart patterns with lines (optional visual aid)
-        pattern_indices = df[df['Chart_Pattern'].notna()].index
-        for pattern_name in df['Chart_Pattern'].dropna().unique():
-            pattern_df = df[df['Chart_Pattern'] == pattern_name]
-            if len(pattern_df) >= 2:
-                fig.add_trace(go.Scatter(
-                    x=pattern_df.index,
-                    y=pattern_df['Close'],
-                    mode='lines',
-                    name=pattern_name,
-                    line=dict(width=2, dash='dot')
-                ))
+        # Support and Resistance Levels
+        support_levels, resistance_levels = find_support_resistance_levels(df)
 
-        # Support and resistance lines
-        supports, resistances = find_support_resistance_levels(df)
+        for level in support_levels:
+            fig.add_hline(y=level, line_dash="dot", line_color="green", annotation_text="Support", annotation_position="bottom left")
 
-        for lvl in supports:
-            fig.add_hline(y=lvl, line=dict(color='green', width=1, dash='dot'),
-                          annotation_text=f"Support @ {lvl:.2f}", annotation_position="bottom left")
+        for level in resistance_levels:
+            fig.add_hline(y=level, line_dash="dot", line_color="red", annotation_text="Resistance", annotation_position="top left")
 
-        for lvl in resistances:
-            fig.add_hline(y=lvl, line=dict(color='red', width=1, dash='dot'),
-                          annotation_text=f"Resistance @ {lvl:.2f}", annotation_position="top left")
-
-        # Layout
+        # Range slider
         fig.update_layout(
-            title='Candlestick Chart with Buy/Sell Signals & Chart Patterns',
-            xaxis_title='Date',
-            yaxis_title='Price',
-            template='plotly_dark',
-            hovermode='x unified',
-            height=700,
-            width=1400,
-            xaxis=dict(
-                rangeslider=dict(visible=False),
-                type="date"
-            ),
-            showlegend=True
+            title="Stock Price with Buy/Sell Signals and Patterns",
+            xaxis_title="Date",
+            yaxis_title="Price",
+            xaxis_rangeslider_visible=True,
+            height=600
         )
 
-        fig.show()
+        st.plotly_chart(fig, use_container_width=True)
 
-    plot_candlestick_with_patterns_and_slider(df,prices=df['Close'])
+    # Show plot
+    plot_candlestick_with_patterns_and_slider(df, df['Close'])
     
