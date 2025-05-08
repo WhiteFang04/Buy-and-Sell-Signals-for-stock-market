@@ -265,7 +265,7 @@ if uploaded_file:
             title="Stock Price with Buy/Sell Signals and Patterns",
             xaxis_title="Date",
             yaxis_title="Price",
-            xaxis_rangeslider_visible=True,
+            xaxis_rangeslider_visible=False,
             height=600
         )
 
